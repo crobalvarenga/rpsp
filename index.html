@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reavivados por Sua Palavra</title>
+
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+
+    body{
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(135deg,#0f172a,#1e293b);
+      color:white;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+    }
+
+    .card{
+      width:100%;
+      max-width:500px;
+      background: rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.1);
+      border-radius:20px;
+      padding:40px 30px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      text-align:center;
+    }
+
+    .logo{
+      font-size:18px;
+      letter-spacing:2px;
+      color:#94a3b8;
+      margin-bottom:15px;
+    }
+
+    h1{
+      font-size:32px;
+      margin-bottom:10px;
+    }
+
+    .date{
+      color:#cbd5e1;
+      margin-bottom:30px;
+      font-size:15px;
+      text-transform:capitalize;
+    }
+
+    .chapter-box{
+      background: rgba(255,255,255,0.06);
+      border-radius:16px;
+      padding:25px;
+      margin-bottom:25px;
+    }
+
+    .chapter-label{
+      color:#94a3b8;
+      font-size:14px;
+      margin-bottom:10px;
+      text-transform:uppercase;
+      letter-spacing:1px;
+    }
+
+    .chapter{
+      font-size:42px;
+      font-weight:bold;
+      color:#38bdf8;
+      line-height:1.2;
+    }
+
+    .btn{
+      display:inline-block;
+      text-decoration:none;
+      background:#38bdf8;
+      color:#0f172a;
+      padding:14px 26px;
+      border-radius:12px;
+      font-weight:bold;
+      transition:0.3s;
+    }
+
+    .btn:hover{
+      transform:translateY(-2px);
+      background:#7dd3fc;
+    }
+
+    .footer{
+      margin-top:25px;
+      color:#94a3b8;
+      font-size:13px;
+    }
+
+    .loading{
+      color:#cbd5e1;
+      font-size:18px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="card">
+
+    <div class="logo">
+      REAVIVADOS POR SUA PALAVRA
+    </div>
+
+    <h1>Leitura do Dia</h1>
+
+    <div class="date" id="dataAtual"></div>
+
+    <div class="chapter-box">
+
+      <div class="chapter-label">
+        Capítulo de Hoje
+      </div>
+
+      <div class="chapter" id="capituloHoje">
+        <span class="loading">Carregando...</span>
+      </div>
+
+    </div>
+
+    <a
+      class="btn"
+      id="linkBiblia"
+      href="#"
+      target="_blank"
+    >
+      Ler Capítulo
+    </a>
+
+    <div class="footer">
+      Projeto devocional diário
+    </div>
+
+  </div>
+
+  <script>
+
+    // DATA FORMATADA
+    const hoje = new Date();
+
+    const dataFormatada = hoje.toLocaleDateString("pt-BR", {
+      weekday: "long",
+      day: "2-digit",
+      month: "long",
+      year: "numeric"
+    });
+
+    document.getElementById("dataAtual").innerText = dataFormatada;
+
+
+    // FEED RSS DO SITE RPSP
+    const rssUrl =
+      "https://api.allorigins.win/raw?url=" +
+      encodeURIComponent("https://reavivadosporsuapalavra.org/feed/");
+
+
+    async function carregarCapituloDoDia() {
+
+      try {
+
+        const response = await fetch(rssUrl);
+
+        const xmlText = await response.text();
+
+        const parser = new DOMParser();
+
+        const xml = parser.parseFromString(xmlText, "text/xml");
+
+        const item = xml.querySelector("item");
+
+        // TÍTULO DO POST
+        let titulo = item.querySelector("title").textContent;
+
+        // REMOVE TEXTO EXTRA
+        titulo = titulo
+          .replace("– ACESSE AQUI O POST DESEJADO", "")
+          .replace("– ACESSE AQUI O POST desejado", "")
+          .trim();
+
+        // EXIBE CAPÍTULO
+        document.getElementById("capituloHoje").innerText = titulo;
+
+        // LINK DO POST
+        const link = item.querySelector("link").textContent;
+
+        document.getElementById("linkBiblia").href = link;
+
+      } catch (erro) {
+
+        console.error(erro);
+
+        document.getElementById("capituloHoje").innerHTML =
+          "Não foi possível carregar.";
+
+      }
+
+    }
+
+    carregarCapituloDoDia();
+
+  </script>
+
+</body>
+</html>
